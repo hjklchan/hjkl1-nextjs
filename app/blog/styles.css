@@ -1,0 +1,7 @@
+.tableBody tr {
+  border-bottom: solid 1px #C2D5E3;
+}
+
+.tableBody tr td {
+  padding: 8px 0;
+}
