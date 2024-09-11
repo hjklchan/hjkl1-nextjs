@@ -1,27 +1,51 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react";
-import { HiMiniLockClosed, HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
+import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
 import "./styles.css";
 import Link from "next/link";
+// import Category from "./components/Category";
+import Category2 from "./components/Category2";
+import moment from "moment";
 
-const activeClass = "border-[#369] text-[#369] bg-[#E5EDF2]";
-const inactiveClass = "border-[#CDCDCD] text-[#333]"
+interface Post {
+    id: number;
+    category_id: number;
+    category_name: string;
+    title: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+}
 
-const categories: { id: number, name: string }[] = [
-    { id: 1, name: "Programming (31)" },
-    { id: 2, name: "Game (7)" },
+const mockData = [
+    {
+        id: 1,
+        name: "Frontend",
+        children: [
+            { id: 2, name: "Javascript" },
+            { id: 3, name: "React18", },
+            { id: 4, name: "Vue3" },
+            { id: 5, name: "Typescript" }
+        ]
+    },
+    {
+        id: 6,
+        name: "Backend",
+        children: [
+            { id: 7, name: "PHP" },
+            { id: 8, name: "Java" },
+            { id: 9, name: "Golang" },
+        ]
+    }
 ];
 
 export default function BlogPage() {
-    const [categoryId, setCategoryId] = useState<number | string>("");
-    const [isNewTab, setIsNewTab] = useState(false);
+    const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
+    const [subCategories, setSubCategories] = useState<{ id: number, name: string }[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
 
-    const onCategoryClick = (id: number | string) => {
-        if (id === categoryId) return;
-        console.log(id);
-        setCategoryId(id);
-    }
+    const [isNewTab, setIsNewTab] = useState(false);
 
     const onNewTab = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const isNewTab = evt.target.checked;
@@ -39,34 +63,58 @@ export default function BlogPage() {
         } : null;
     }, [isNewTab]);
 
+    const fetchCategories = async (parentId: number) => {
+        const data = await fetch(`http://127.0.0.1:9000/categories?parent_id=${parentId}`);
+        const jsonData = await data.json();
+        return jsonData.data;
+    };
+
+    const fetchPosts = async (categoryId: number) => {
+        const data = await fetch(`http://127.0.0.1:9000/posts?category_id=${categoryId}`);
+        const jsonData = await data.json();
+        return jsonData.data;
+    }
+
+    const onCategoryClick = async (id: number) => {
+        if (id === 0) {
+            setSubCategories([]);
+            return;
+        }
+        const subCategories = await fetchCategories(id);
+        setSubCategories(subCategories);
+    };
+
+    const onSubCategoryClick = async (categoryId: number) => {
+        // Fetch posts
+        const posts = await fetchPosts(categoryId);
+        setPosts(posts);
+    };
+
     useEffect(() => {
-    }, []);
+        (async () => {
+            const categories = await fetchCategories(0);
+            setCategories(categories);
+        })();
+
+        if (categories.length === 0) {
+            (async () => {
+                const posts = await fetchPosts(0);
+                setPosts(posts);
+            })();
+        }
+    }, [categories]);
 
     return <>
-        <ul className="flex flex-wrap items-center by-2 my-2 text-xs">
-            {
-                categories.map(item => {
-                    const isActive = categoryId === item.id ? activeClass : inactiveClass;
-                    return <li key={item.id} className="float-left pr-2">
-                        <a onClick={() => onCategoryClick(item.id)} className={`hover:cursor-pointer p-1 border ${isActive}`}>
-                            {item.name}
-                        </a>
-                    </li>;
-                })
-            }
-        </ul>
-        <ul className="flex flex-wrap items-center by-2 my-3 text-xs">
-            <li className="float-left pr-2">
-                <a className="hover:cursor-pointer border border-[#CDCDCD] text-[#333333] p-1">
-                    PHP (14)
-                </a>
-            </li>
-            <li className="float-left pr-2">
-                <a className="hover:cursor-pointer border border-[#369] text-[#369] bg-[#E5EDF2] p-1">
-                    Golang (27)
-                </a>
-            </li>
-        </ul>
+        {/* Categories */}
+        {/* <Category
+            onRootClick={onCategoryClick}
+            // Start getting posts in this category
+            onSubClick={onSubCategoryClick}
+            items={categories}
+            subItems={subCategories}
+        /> */}
+        <Category2 items={mockData} />
+
         {/* Posts */}
         <div className="mt-6">
             <table className="w-full table-fixed" cellSpacing={0} cellPadding={0}>
@@ -90,110 +138,44 @@ export default function BlogPage() {
                     </tr>
                 </tbody>
             </table>
-            <table className="table-fixed w-full text-sm text-[#334]" cellSpacing={0} cellPadding={0}>
-                <tbody className={"tableBody"}>
-                    <tr className="table-row align-middle hover:bg-[#F2F2F2]">
-                        <td className="w-6">
-                            <HiOutlineChatBubbleBottomCenterText className="w-full block" />
-                        </td>
-                        <td>
-                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
-                                [C&C++ 原创]
-                            </Link>
-                            <Link href={"/"} className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]" {...newTabProps}>
-                                另一种基于AVX2/SSE2的高效模式匹配算法在内存搜索中的应用-By.Haogl-2024090
-                            </Link>
-                        </td>
-                        <td className="w-28">
-                            <cite>
-                                <a
-                                    className="hover:cursor-pointer text-[#369]"
-                                    title="AxiaoWyaoAAAAAAAAAAAAAAAAAAAA"
-                                >
-                                    haogl
-                                </a>
-                            </cite>
-                        </td>
-                        <td className="w-24">1.2k / 5k</td>
-                        <td className="w-28">2024/09/10</td>
-                    </tr>
-                    <tr className="table-row align-middle hover:bg-[#F2F2F2]">
-                        <td className="w-6">
-                            <HiMiniLockClosed className="w-full block" />
-                        </td>
-                        <td>
-                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
-                                [其他原创]
-                            </Link>
-                            <span className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]">
-                                【开源】IP配置工具_2.6__一键切换IP、改Mac、计算机名
-                            </span>
-                        </td>
-                        <td className="w-28">
-                            <cite>
-                                <a
-                                    className="hover:cursor-pointer text-[#369]"
-                                    title="快乐的小萌新"
-                                >
-                                    快乐的小萌新
-                                </a>
-                            </cite>
-                        </td>
-                        <td className="w-24">78 / 120</td>
-                        <td className="w-28">2024/09/10</td>
-                    </tr>
-                    <tr className="table-row align-middle hover:bg-[#F2F2F2]">
-                        <td className="w-6">
-                            <HiMiniLockClosed className="w-full block" />
-                        </td>
-                        <td>
-                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
-                                [其他原创]
-                            </Link>
-                            <span className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]">
-                                【开源】IP配置工具_2.6__一键切换IP、改Mac、计算机名
-                            </span>
-                        </td>
-                        <td className="w-28">
-                            <cite>
-                                <a
-                                    className="hover:cursor-pointer text-[#369]"
-                                    title="快乐的小萌新"
-                                >
-                                    快乐的小萌新
-                                </a>
-                            </cite>
-                        </td>
-                        <td className="w-24">78 / 120</td>
-                        <td className="w-28">2024/09/10</td>
-                    </tr>
-                    <tr className="table-row align-middle hover:bg-[#F2F2F2]">
-                        <td className="w-6">
-                            <HiMiniLockClosed className="w-full block" />
-                        </td>
-                        <td>
-                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
-                                [其他原创]
-                            </Link>
-                            <span className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]">
-                                【开源】IP配置工具_2.6__一键切换IP、改Mac、计算机名
-                            </span>
-                        </td>
-                        <td className="w-28">
-                            <cite>
-                                <a
-                                    className="hover:cursor-pointer text-[#369]"
-                                    title="快乐的小萌新"
-                                >
-                                    快乐的小萌新
-                                </a>
-                            </cite>
-                        </td>
-                        <td className="w-24">78 / 120</td>
-                        <td className="w-28">2024/09/10</td>
-                    </tr>
-                </tbody>
-            </table>
+            {
+                posts.length > 0 ? (
+                    <table className="table-fixed w-full text-sm text-[#334]" cellSpacing={0} cellPadding={0}>
+                        <tbody className={"tableBody"}>
+                            {
+                                posts.map(post => {
+                                    const updatedAt = moment(post.updated_at).format("YYYY/MM/DD");
+                                    return <tr key={post.id} className="table-row align-middle hover:bg-[#F2F2F2]">
+                                        <td className="w-6">
+                                            <HiOutlineChatBubbleBottomCenterText className="w-full block" />
+                                        </td>
+                                        <td>
+                                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
+                                                [{post.category_name}]
+                                            </Link>
+                                            <Link href={"/"} className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]" {...newTabProps}>
+                                                {post.title}
+                                            </Link>
+                                        </td>
+                                        <td className="w-28">
+                                            <cite>
+                                                <a
+                                                    className="hover:cursor-pointer text-[#369]"
+                                                    title="(TODO)"
+                                                >
+                                                    (TODO)
+                                                </a>
+                                            </cite>
+                                        </td>
+                                        <td className="w-24">1.2k / 5k</td>
+                                        <td className="w-28">{updatedAt}</td>
+                                    </tr>
+                                })
+                            }
+                        </tbody>
+                    </table>
+                ) : <div className="py-2 text-sm text-gray-600">No content...</div>
+            }
         </div>
     </>;
 }
