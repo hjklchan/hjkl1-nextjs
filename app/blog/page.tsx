@@ -91,17 +91,17 @@ export default function BlogPage() {
     };
 
     useEffect(() => {
-        (async () => {
-            const categories = await fetchCategories(0);
-            setCategories(categories);
-        })();
-
-        if (categories.length === 0) {
-            (async () => {
-                const posts = await fetchPosts(0);
-                setPosts(posts);
-            })();
-        }
+        // (async () => {
+        //     const categories = await fetchCategories(0);
+        //     setCategories(categories);
+        // })();
+        //
+        // if (categories.length === 0) {
+        //     (async () => {
+        //         const posts = await fetchPosts(0);
+        //         setPosts(posts);
+        //     })();
+        // }
     }, [categories]);
 
     return <>
