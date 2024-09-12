@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
 import "./styles.css";
 import Link from "next/link";
-import Category2 from "./components/Category2";
+import Category2, { Category } from "./components/Category2";
 import Loading from "./components/Loading";
 import moment from "moment";
 
@@ -64,6 +64,7 @@ const mockData = [
 
 export default function BlogPage() {
     const [posts] = useState<Post[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const [isNewTab, setIsNewTab] = useState(false);
 
@@ -85,11 +86,11 @@ export default function BlogPage() {
             : null;
     }, [isNewTab]);
 
-    // const fetchCategories = async () => {
-    //     const data = await fetch(`http://127.0.0.1:9000/categories`);
-    //     const jsonData = await data.json();
-    //     return jsonData.data;
-    // };
+    const fetchCategories = async () => {
+        const data = await fetch("http://127.0.0.1:9000/categories/tree");
+        const jsonData = await data.json();
+        return jsonData.data;
+    };
 
     // const fetchPosts = async (categoryId: number) => {
     //     const data = await fetch(`http://127.0.0.1:9000/posts?category_id=${categoryId}`);
@@ -104,10 +105,10 @@ export default function BlogPage() {
     };
 
     useEffect(() => {
-        // (async () => {
-        //     const categories = await fetchCategories(0);
-        //     setCategories(categories);
-        // })();
+        (async () => {
+            const categories = await fetchCategories();
+            setCategories(categories);
+        })();
         //
         // if (categories.length === 0) {
         //     (async () => {
@@ -121,7 +122,7 @@ export default function BlogPage() {
         <>
             {/* Categories */}
             <Suspense fallback={<Loading />}>
-                <Category2 items={mockData} onSelected={onCategorySelected} />
+                <Category2 items={categories} onSelected={onCategorySelected} />
             </Suspense>
 
             {/* Posts */}
