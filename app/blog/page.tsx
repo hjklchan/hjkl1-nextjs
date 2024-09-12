@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
 import "./styles.css";
 import Link from "next/link";
-// import Category from "./components/Category";
 import Category2 from "./components/Category2";
+import Loading from "./components/Loading";
 import moment from "moment";
 
 interface Post {
@@ -24,10 +24,10 @@ const mockData = [
         name: "Frontend",
         children: [
             { id: 2, name: "Javascript" },
-            { id: 3, name: "React18", },
+            { id: 3, name: "React18" },
             { id: 4, name: "Vue3" },
-            { id: 5, name: "Typescript" }
-        ]
+            { id: 5, name: "Typescript" },
+        ],
     },
     {
         id: 6,
@@ -39,13 +39,13 @@ const mockData = [
                 children: [
                     {
                         id: 11,
-                        name: "Laravel"
+                        name: "Laravel",
                     },
                     {
                         id: 12,
-                        name: "ThinkPHP"
+                        name: "ThinkPHP",
                     },
-                ]
+                ],
             },
             { id: 8, name: "Java" },
             {
@@ -54,12 +54,12 @@ const mockData = [
                 children: [
                     {
                         id: 10,
-                        name: "Gin Framework"
-                    }
-                ]
+                        name: "Gin Framework",
+                    },
+                ],
             },
-        ]
-    }
+        ],
+    },
 ];
 
 export default function BlogPage() {
@@ -70,17 +70,19 @@ export default function BlogPage() {
     const onNewTab = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const isNewTab = evt.target.checked;
         setIsNewTab(isNewTab);
-    }
+    };
 
     const onShowTop = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const isShowTop = evt.target.checked;
-        console.log("Is show top?", isShowTop);
-    }
+        console.log("Is show top?", isShowTop); // skipcq: JS-0002
+    };
 
     const newTabProps = useMemo(() => {
-        return isNewTab ? {
-            target: "_blank",
-        } : null;
+        return isNewTab
+            ? {
+                  target: "_blank",
+              }
+            : null;
     }, [isNewTab]);
 
     // const fetchCategories = async () => {
@@ -96,10 +98,10 @@ export default function BlogPage() {
     // }
 
     const onCategorySelected = (categoryId: number) => {
-        console.log(categoryId);
-        
+        console.log(categoryId); // skipcq: JS-0002
+
         // fetchPosts(categoryId);
-    }
+    };
 
     useEffect(() => {
         // (async () => {
@@ -115,71 +117,114 @@ export default function BlogPage() {
         // }
     }, []);
 
-    return <>
-        {/* Categories */}
-        <Category2 items={mockData} onSelected={onCategorySelected} />
+    return (
+        <>
+            {/* Categories */}
+            <Suspense fallback={<Loading />}>
+                <Category2 items={mockData} onSelected={onCategorySelected} />
+            </Suspense>
 
-        {/* Posts */}
-        <div className="mt-6">
-            <table className="w-full table-fixed" cellSpacing={0} cellPadding={0}>
-                <tbody>
-                    <tr className="border-b border-[#hC2D5E3] bg-[#F2F2F2] border-b border-[#C2D5E3] text-xs">
-                        <td colSpan={2} className="text-left pl-2 py-3 space-x-3">
-                            <div className="inline-block space-x-1">
-                                <input type="checkbox" onChange={onNewTab} /><label>New Tab</label>
-                            </div>
-                            <div className="inline-block space-x-1">
-                                <input type="checkbox" onChange={onShowTop} /><label>Show Top</label>
-                            </div>
-                            <a className="hover:cursor-pointer text-[#369]">All</a>
-                            <a className="hover:cursor-pointer text-[#369]">Newest</a>
-                            <a className="hover:cursor-pointer text-[#369]">Popular</a>
-                        </td>
-                        {/* TODO Hide by device */}
-                        <td className="w-28">Author</td>
-                        <td className="w-24">Info</td>
-                        <td className="w-28">Last Updated</td>
-                    </tr>
-                </tbody>
-            </table>
-            {
-                posts.length > 0 ? (
-                    <table className="table-fixed w-full text-sm text-[#334]" cellSpacing={0} cellPadding={0}>
+            {/* Posts */}
+            <div className="mt-6">
+                <table
+                    className="w-full table-fixed"
+                    cellSpacing={0}
+                    cellPadding={0}
+                >
+                    <tbody>
+                        <tr className="border-b border-[#hC2D5E3] bg-[#F2F2F2] border-[#C2D5E3] text-xs">
+                            <td
+                                colSpan={2}
+                                className="text-left pl-2 py-3 space-x-3"
+                            >
+                                <div className="inline-block space-x-1">
+                                    <input
+                                        type="checkbox"
+                                        onChange={onNewTab}
+                                    />
+                                    <label>New Tab</label>
+                                </div>
+                                <div className="inline-block space-x-1">
+                                    <input
+                                        type="checkbox"
+                                        onChange={onShowTop}
+                                    />
+                                    <label>Show Top</label>
+                                </div>
+                                <button className="hover:cursor-pointer text-[#369]">
+                                    All
+                                </button>
+                                <button className="hover:cursor-pointer text-[#369]">
+                                    Newest
+                                </button>
+                                <button className="hover:cursor-pointer text-[#369]">
+                                    Popular
+                                </button>
+                            </td>
+                            {/* TODO Hide by device */}
+                            <td className="w-28">Author</td>
+                            <td className="w-24">Info</td>
+                            <td className="w-28">Last Updated</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {posts.length > 0 ? (
+                    <table
+                        className="table-fixed w-full text-sm text-[#334]"
+                        cellSpacing={0}
+                        cellPadding={0}
+                    >
                         <tbody className={"tableBody"}>
-                            {
-                                posts.map(post => {
-                                    const updatedAt = moment(post.updated_at).format("YYYY/MM/DD");
-                                    return <tr key={post.id} className="table-row align-middle hover:bg-[#F2F2F2]">
+                            {posts.map((post) => {
+                                const updatedAt = moment(
+                                    post.updated_at
+                                ).format("YYYY/MM/DD");
+                                return (
+                                    <tr
+                                        key={post.id}
+                                        className="table-row align-middle hover:bg-[#F2F2F2]"
+                                    >
                                         <td className="w-6">
                                             <HiOutlineChatBubbleBottomCenterText className="w-full block" />
                                         </td>
                                         <td>
-                                            <Link href={""} className="hover:cursor-pointer text-[#369] pl-1 pr-2">
+                                            <Link
+                                                href={""}
+                                                className="hover:cursor-pointer text-[#369] pl-1 pr-2"
+                                            >
                                                 [{post.category_name}]
                                             </Link>
-                                            <Link href={"/"} className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]" {...newTabProps}>
+                                            <Link
+                                                href={"/"}
+                                                className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]"
+                                                {...newTabProps}
+                                            >
                                                 {post.title}
                                             </Link>
                                         </td>
                                         <td className="w-28">
                                             <cite>
-                                                <a
+                                                <button
                                                     className="hover:cursor-pointer text-[#369]"
                                                     title="(TODO)"
                                                 >
                                                     (TODO)
-                                                </a>
+                                                </button>
                                             </cite>
                                         </td>
                                         <td className="w-24">1.2k / 5k</td>
                                         <td className="w-28">{updatedAt}</td>
                                     </tr>
-                                })
-                            }
+                                );
+                            })}
                         </tbody>
                     </table>
-                ) : <div className="py-2 text-sm text-gray-600">No content...</div>
-            }
-        </div>
-    </>;
+                ) : (
+                    <div className="py-2 text-sm text-gray-600">
+                        No content...
+                    </div>
+                )}
+            </div>
+        </>
+    );
 }

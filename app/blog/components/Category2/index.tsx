@@ -54,12 +54,12 @@ export default function Category2(props: Category2Props) {
     }
 
     return <>
-        <a
+        <button
             onClick={onResetClick}
-            className="text-xs hover:border-b hover:cursor-pointer"
+            className="text-xs hover:border-b border-[#333]"
         >
             Reset
-        </a>
+        </button>
         {
             preselectItems.size > 0 ? Array.from(preselectItems).map(item => {
                 const [level, category] = item;
@@ -68,23 +68,23 @@ export default function Category2(props: Category2Props) {
 
                 return children && children.length > 0
                     ? (
-                        <ul key={level} className="flex flex-wrap items-center by-2 my-3 text-xs">
+                        <ul key={level} className="flex flex-wrap items-center by-2 my-2 text-xs">
                             {
                                 children && children.length > 0
                                     ? children.map(item => {
-                                        const isActive = item.id == currentCategoryId ? activeClass : inactiveClass;
+                                        const isActive = item.id === currentCategoryId ? activeClass : inactiveClass;
 
                                         return (
                                             <li key={item.id} className="float-left pr-2">
-                                                <a
+                                                <button
                                                     onClick={() => {
                                                         onCategorySelected(item, level + 1)
                                                         if (props.onSelected) props.onSelected(item.id);
                                                     }}
-                                                    className={`hover:cursor-pointer p-1 border ${isActive}`}
+                                                    className={`p-1 border ${isActive}`}
                                                 >
                                                     {item.name}
-                                                </a>
+                                                </button>
                                             </li>
                                         )
                                     })
