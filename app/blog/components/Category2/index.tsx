@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const activeClass = "border-[#369] text-[#369] bg-[#E5EDF2]";
-const inactiveClass = "border-[#CDCDCD] text-[#333]"
+const inactiveClass = "border-[#CDCDCD] text-[#333]";
 
 export interface Category {
     id: number;
@@ -17,7 +17,9 @@ interface Category2Props {
 }
 
 export default function Category2(props: Category2Props) {
-    const [preselectItems, setPreselectItems] = useState<Map<number, Category>>(new Map());
+    const [preselectItems, setPreselectItems] = useState<Map<number, Category>>(
+        new Map()
+    );
 
     const root = useMemo(
         (): Category[] => [{ id: 0, name: "root", children: props.items }],
@@ -28,7 +30,7 @@ export default function Category2(props: Category2Props) {
         setPreselectItems(new Map());
         if (root && root.length > 0) {
             const first = root[0];
-            setPreselectItems(pre => new Map(pre.set(1, first)));
+            setPreselectItems((pre) => new Map(pre.set(1, first)));
         }
     }, [root]);
 
@@ -39,61 +41,76 @@ export default function Category2(props: Category2Props) {
 
     const onCategorySelected = (category: Category, level: number) => {
         if (preselectItems.has(level + 1)) {
-            setPreselectItems(pre => {
+            setPreselectItems((pre) => {
                 pre.delete(level + 1);
                 return pre;
             });
         }
 
-        setPreselectItems(pre => new Map(pre.set(level, category)));
+        setPreselectItems((pre) => new Map(pre.set(level, category)));
     };
 
     const onResetClick = () => {
         // Initialise the preselectItems again
         init();
-    }
+    };
 
-    return <>
-        <button
-            onClick={onResetClick}
-            className="text-xs hover:border-b border-[#333]"
-        >
-            Reset
-        </button>
-        {
-            preselectItems.size > 0 ? Array.from(preselectItems).map(item => {
-                const [level, category] = item;
-                const currentCategoryId = preselectItems.get(level + 1)?.id;
-                const children = category.children;
+    return (
+        <>
+            <button
+                onClick={onResetClick}
+                className="text-xs hover:border-b border-[#333]"
+            >
+                Reset
+            </button>
+            {preselectItems.size > 0
+                ? Array.from(preselectItems).map((item) => {
+                      const [level, category] = item;
+                      const currentCategoryId = preselectItems.get(
+                          level + 1
+                      )?.id;
+                      const children = category.children;
 
-                return children && children.length > 0
-                    ? (
-                        <ul key={level} className="flex flex-wrap items-center by-2 my-2 text-xs">
-                            {
-                                children && children.length > 0
-                                    ? children.map(item => {
-                                        const isActive = item.id === currentCategoryId ? activeClass : inactiveClass;
+                      return children && children.length > 0 ? (
+                          <ul
+                              key={level}
+                              className="flex flex-wrap items-center by-2 my-2 text-xs"
+                          >
+                              {children && children.length > 0
+                                  ? children.map((item) => {
+                                        const isActive =
+                                            item.id === currentCategoryId
+                                                ? activeClass
+                                                : inactiveClass;
 
                                         return (
-                                            <li key={item.id} className="float-left pr-2">
+                                            <li
+                                                key={item.id}
+                                                className="float-left pr-2"
+                                            >
                                                 <button
                                                     onClick={() => {
-                                                        onCategorySelected(item, level + 1)
-                                                        if (props.onSelected) props.onSelected(item.id);
+                                                        onCategorySelected(
+                                                            item,
+                                                            level + 1
+                                                        );
+                                                        if (props.onSelected)
+                                                            props.onSelected(
+                                                                item.id
+                                                            );
                                                     }}
                                                     className={`p-1 border ${isActive}`}
                                                 >
                                                     {item.name}
                                                 </button>
                                             </li>
-                                        )
+                                        );
                                     })
-                                    : null
-                            }
-                        </ul>
-                    )
-                    : null
-            }) : null
-        }
-    </>
+                                  : null}
+                          </ul>
+                      ) : null;
+                  })
+                : null}
+        </>
+    );
 }
