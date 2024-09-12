@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const activeClass = "border-[#369] text-[#369] bg-[#E5EDF2]";
 const inactiveClass = "border-[#CDCDCD] text-[#333]"
@@ -13,53 +13,86 @@ export interface Category {
 
 interface Category2Props {
     items?: Category[];
-    onSelect?: (categoryId: number) => void;
+    onSelected?: (categoryId: number) => void;
 }
 
 export default function Category2(props: Category2Props) {
-    const isActive = activeClass;
+    const [preselectItems, setPreselectItems] = useState<Map<number, Category>>(new Map());
 
-    const [preselectItems, setPreselectItems] = useState<Category[]>([]);
+    const root = useMemo(
+        (): Category[] => [{ id: 0, name: "root", children: props.items }],
+        [props.items]
+    );
+
+    const init = useCallback(() => {
+        setPreselectItems(new Map());
+        if (root && root.length > 0) {
+            const first = root[0];
+            setPreselectItems(pre => new Map(pre.set(1, first)));
+        }
+    }, [root]);
 
     useEffect(() => {
-        if (props.items && props.items.length > 0) {
+        // Initialise the preselectItems
+        init();
+    }, [init]);
 
+    const onCategorySelected = (category: Category, level: number) => {
+        if (preselectItems.has(level + 1)) {
+            setPreselectItems(pre => {
+                pre.delete(level + 1);
+                return pre;
+            });
         }
-    },);
 
-    const onCategorySelected = (categoryId: number) => {
-        console.log(categoryId);
-        
-        return;
+        setPreselectItems(pre => new Map(pre.set(level, category)));
     };
 
+    const onResetClick = () => {
+        // Initialise the preselectItems again
+        init();
+    }
+
     return <>
+        <a
+            onClick={onResetClick}
+            className="text-xs hover:border-b hover:cursor-pointer"
+        >
+            Reset
+        </a>
         {
-            // 遍历一级分类
-            props.items && props.items.length > 0 ? <ul className="flex flex-wrap items-center by-2 my-2 text-xs">
-                {
-                    props.items.map(item => {
-                        return <li key={item.id} className="float-left pr-2">
-                            <a
-                                onClick={() => onCategorySelected(item.id)}
-                                className={`hover:cursor-pointer p-1 border ${isActive}`}
-                            >
-                                {item.name}
-                            </a>
-                        </li>
-                    })
-                }
-            </ul> : null
-        }
-        {
-            preselectItems.length > 0 ? preselectItems.map(item => {
-                return <ul key={item.id} className="flex flex-wrap items-center by-2 my-2 text-xs">
-                    {
-                        item.children && item.children.length > 0 ? item.children.map(item => {
-                            return <li key={item.id} className="float-left pr-2">{item.name}</li>
-                        }) : null
-                    }
-                </ul>
+            preselectItems.size > 0 ? Array.from(preselectItems).map(item => {
+                const [level, category] = item;
+                const currentCategoryId = preselectItems.get(level + 1)?.id;
+                const children = category.children;
+
+                return children && children.length > 0
+                    ? (
+                        <ul key={level} className="flex flex-wrap items-center by-2 my-3 text-xs">
+                            {
+                                children && children.length > 0
+                                    ? children.map(item => {
+                                        const isActive = item.id == currentCategoryId ? activeClass : inactiveClass;
+
+                                        return (
+                                            <li key={item.id} className="float-left pr-2">
+                                                <a
+                                                    onClick={() => {
+                                                        onCategorySelected(item, level + 1)
+                                                        if (props.onSelected) props.onSelected(item.id);
+                                                    }}
+                                                    className={`hover:cursor-pointer p-1 border ${isActive}`}
+                                                >
+                                                    {item.name}
+                                                </a>
+                                            </li>
+                                        )
+                                    })
+                                    : null
+                            }
+                        </ul>
+                    )
+                    : null
             }) : null
         }
     </>

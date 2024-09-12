@@ -33,9 +33,31 @@ const mockData = [
         id: 6,
         name: "Backend",
         children: [
-            { id: 7, name: "PHP" },
+            {
+                id: 7,
+                name: "PHP",
+                children: [
+                    {
+                        id: 11,
+                        name: "Laravel"
+                    },
+                    {
+                        id: 12,
+                        name: "ThinkPHP"
+                    },
+                ]
+            },
             { id: 8, name: "Java" },
-            { id: 9, name: "Golang" },
+            {
+                id: 9,
+                name: "Golang",
+                children: [
+                    {
+                        id: 10,
+                        name: "Gin Framework"
+                    }
+                ]
+            },
         ]
     }
 ];
@@ -63,8 +85,8 @@ export default function BlogPage() {
         } : null;
     }, [isNewTab]);
 
-    const fetchCategories = async (parentId: number) => {
-        const data = await fetch(`http://127.0.0.1:9000/categories?parent_id=${parentId}`);
+    const fetchCategories = async () => {
+        const data = await fetch(`http://127.0.0.1:9000/categories`);
         const jsonData = await data.json();
         return jsonData.data;
     };
@@ -75,20 +97,11 @@ export default function BlogPage() {
         return jsonData.data;
     }
 
-    const onCategoryClick = async (id: number) => {
-        if (id === 0) {
-            setSubCategories([]);
-            return;
-        }
-        const subCategories = await fetchCategories(id);
-        setSubCategories(subCategories);
-    };
-
-    const onSubCategoryClick = async (categoryId: number) => {
-        // Fetch posts
-        const posts = await fetchPosts(categoryId);
-        setPosts(posts);
-    };
+    const onCategorySelected = (categoryId: number) => {
+        console.log(categoryId);
+        
+        // fetchPosts(categoryId);
+    }
 
     useEffect(() => {
         // (async () => {
@@ -106,14 +119,7 @@ export default function BlogPage() {
 
     return <>
         {/* Categories */}
-        {/* <Category
-            onRootClick={onCategoryClick}
-            // Start getting posts in this category
-            onSubClick={onSubCategoryClick}
-            items={categories}
-            subItems={subCategories}
-        /> */}
-        <Category2 items={mockData} />
+        <Category2 items={mockData} onSelected={onCategorySelected} />
 
         {/* Posts */}
         <div className="mt-6">
