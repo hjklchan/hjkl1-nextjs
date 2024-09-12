@@ -63,9 +63,7 @@ const mockData = [
 ];
 
 export default function BlogPage() {
-    const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
-    const [subCategories, setSubCategories] = useState<{ id: number, name: string }[]>([]);
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [posts] = useState<Post[]>([]);
 
     const [isNewTab, setIsNewTab] = useState(false);
 
@@ -85,17 +83,17 @@ export default function BlogPage() {
         } : null;
     }, [isNewTab]);
 
-    const fetchCategories = async () => {
-        const data = await fetch(`http://127.0.0.1:9000/categories`);
-        const jsonData = await data.json();
-        return jsonData.data;
-    };
+    // const fetchCategories = async () => {
+    //     const data = await fetch(`http://127.0.0.1:9000/categories`);
+    //     const jsonData = await data.json();
+    //     return jsonData.data;
+    // };
 
-    const fetchPosts = async (categoryId: number) => {
-        const data = await fetch(`http://127.0.0.1:9000/posts?category_id=${categoryId}`);
-        const jsonData = await data.json();
-        return jsonData.data;
-    }
+    // const fetchPosts = async (categoryId: number) => {
+    //     const data = await fetch(`http://127.0.0.1:9000/posts?category_id=${categoryId}`);
+    //     const jsonData = await data.json();
+    //     return jsonData.data;
+    // }
 
     const onCategorySelected = (categoryId: number) => {
         console.log(categoryId);
@@ -115,7 +113,7 @@ export default function BlogPage() {
         //         setPosts(posts);
         //     })();
         // }
-    }, [categories]);
+    }, []);
 
     return <>
         {/* Categories */}
