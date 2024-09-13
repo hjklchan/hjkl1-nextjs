@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
+import { HiOutlineChatBubbleBottomCenterText, HiOutlineEye, HiOutlineChatBubbleLeftEllipsis } from "react-icons/hi2";
 import "./styles.css";
 import Link from "next/link";
 import Category2, { Category } from "./components/Category2";
@@ -18,55 +18,14 @@ interface Post {
     updated_at: string;
 }
 
-const mockData = [
-    {
-        id: 1,
-        name: "Frontend",
-        children: [
-            { id: 2, name: "Javascript" },
-            { id: 3, name: "React18" },
-            { id: 4, name: "Vue3" },
-            { id: 5, name: "Typescript" },
-        ],
-    },
-    {
-        id: 6,
-        name: "Backend",
-        children: [
-            {
-                id: 7,
-                name: "PHP",
-                children: [
-                    {
-                        id: 11,
-                        name: "Laravel",
-                    },
-                    {
-                        id: 12,
-                        name: "ThinkPHP",
-                    },
-                ],
-            },
-            { id: 8, name: "Java" },
-            {
-                id: 9,
-                name: "Golang",
-                children: [
-                    {
-                        id: 10,
-                        name: "Gin Framework",
-                    },
-                ],
-            },
-        ],
-    },
-];
-
 export default function BlogPage() {
-    const [posts] = useState<Post[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    // 防止重新请求
+    const [currentCategory, setCurrentCategoryId] = useState<number | null>(null);
+    const [loadingPosts, setLoadingPost] = useState(false);
 
-    const [isNewTab, setIsNewTab] = useState(false);
+    const [isNewTab, setIsNewTab] = useState(true);
 
     const onNewTab = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const isNewTab = evt.target.checked;
@@ -81,8 +40,8 @@ export default function BlogPage() {
     const newTabProps = useMemo(() => {
         return isNewTab
             ? {
-                  target: "_blank",
-              }
+                target: "_blank",
+            }
             : null;
     }, [isNewTab]);
 
@@ -92,16 +51,52 @@ export default function BlogPage() {
         return jsonData.data;
     };
 
-    // const fetchPosts = async (categoryId: number) => {
-    //     const data = await fetch(`http://127.0.0.1:9000/posts?category_id=${categoryId}`);
-    //     const jsonData = await data.json();
-    //     return jsonData.data;
-    // }
+    const fetchPosts = async (categoryId?: number) => {
+        const defaultUrl = "http://127.0.0.1:9000/posts";
+
+        let url: string;
+        if (categoryId) {
+            url = `http://127.0.0.1:9000/posts?category_id=${categoryId}`;
+        } else {
+            url = defaultUrl;
+        }
+
+        const data = await fetch(url);
+        const jsonData = await data.json();
+        return jsonData.data;
+    }
+
+    const onCategoryReset = () => {
+        fetchPosts()
+            .then(res => {
+                setPosts(res);
+            })
+            .catch(err => {
+                // TODO
+                console.log(err);
+            })
+            .finally(() => {
+                setCurrentCategoryId(null);
+            });
+    }
 
     const onCategorySelected = (categoryId: number) => {
-        console.log(categoryId); // skipcq: JS-0002
+        if (currentCategory === categoryId) {
+            return;
+        }
 
-        // fetchPosts(categoryId);
+        setLoadingPost(true);
+        fetchPosts(categoryId)
+            .then(res => {
+                setPosts(res);
+            })
+            .catch(err => {
+                // TODO
+                console.log(err);
+            })
+            .finally(() => {
+                setCurrentCategoryId(categoryId);
+            });
     };
 
     useEffect(() => {
@@ -109,20 +104,13 @@ export default function BlogPage() {
             const categories = await fetchCategories();
             setCategories(categories);
         })();
-        //
-        // if (categories.length === 0) {
-        //     (async () => {
-        //         const posts = await fetchPosts(0);
-        //         setPosts(posts);
-        //     })();
-        // }
     }, []);
 
     return (
         <>
             {/* Categories */}
             <Suspense fallback={<Loading />}>
-                <Category2 items={categories} onSelected={onCategorySelected} />
+                <Category2 items={categories} onReset={onCategoryReset} onSelected={onCategorySelected} />
             </Suspense>
 
             {/* Posts */}
@@ -141,6 +129,7 @@ export default function BlogPage() {
                                 <div className="inline-block space-x-1">
                                     <input
                                         type="checkbox"
+                                        defaultChecked
                                         onChange={onNewTab}
                                     />
                                     <label>New Tab</label>
@@ -164,7 +153,13 @@ export default function BlogPage() {
                             </td>
                             {/* TODO Hide by device */}
                             <td className="w-28">Author</td>
-                            <td className="w-24">Info</td>
+                            <td className="w-24">
+                                <div className="flex space-x-1">
+                                    <HiOutlineChatBubbleLeftEllipsis />
+                                    <span>/</span>
+                                    <HiOutlineEye />
+                                </div>
+                            </td>
                             <td className="w-28">Last Updated</td>
                         </tr>
                     </tbody>
@@ -180,6 +175,7 @@ export default function BlogPage() {
                                 const updatedAt = moment(
                                     post.updated_at
                                 ).format("YYYY/MM/DD");
+
                                 return (
                                     <tr
                                         key={post.id}
@@ -196,7 +192,7 @@ export default function BlogPage() {
                                                 [{post.category_name}]
                                             </Link>
                                             <Link
-                                                href={"/"}
+                                                href={`/blog/posts/${post.id}`}
                                                 className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]"
                                                 {...newTabProps}
                                             >
@@ -214,7 +210,7 @@ export default function BlogPage() {
                                             </cite>
                                         </td>
                                         <td className="w-24">1.2k / 5k</td>
-                                        <td className="w-28">{updatedAt}</td>
+                                        <td className="w-28">{updatedAt ? updatedAt : "N/A"}</td>
                                     </tr>
                                 );
                             })}

@@ -14,6 +14,8 @@ export interface Category {
 interface Category2Props {
     items?: Category[];
     onSelected?: (categoryId: number) => void;
+    onLastSelected?: (categoryId: number) => void;
+    onReset?: () => void;
 }
 
 export default function Category2(props: Category2Props) {
@@ -53,6 +55,7 @@ export default function Category2(props: Category2Props) {
     const onResetClick = () => {
         // Initialise the preselectItems again
         init();
+        if (props.onReset) props.onReset();
     };
 
     return (
@@ -65,51 +68,52 @@ export default function Category2(props: Category2Props) {
             </button>
             {preselectItems.size > 0
                 ? Array.from(preselectItems).map((item) => {
-                      const [level, category] = item;
-                      const currentCategoryId = preselectItems.get(
-                          level + 1
-                      )?.id;
-                      const children = category.children;
+                    const [level, category] = item;
+                    const currentCategoryId = preselectItems.get(
+                        level + 1
+                    )?.id;
+                    const children = category.children;
 
-                      return children && children.length > 0 ? (
-                          <ul
-                              key={level}
-                              className="flex flex-wrap items-center by-2 my-2 text-xs"
-                          >
-                              {children && children.length > 0
-                                  ? children.map((item) => {
-                                        const isActive =
-                                            item.id === currentCategoryId
-                                                ? activeClass
-                                                : inactiveClass;
+                    return children && children.length > 0 ? (
+                        <ul
+                            key={level}
+                            className="flex flex-wrap items-center by-2 my-2 text-xs"
+                        >
+                            {children && children.length > 0
+                                ? children.map((item) => {
+                                    const isActive =
+                                        item.id === currentCategoryId
+                                            ? activeClass
+                                            : inactiveClass;
 
-                                        return (
-                                            <li
-                                                key={item.id}
-                                                className="float-left pr-2"
+                                    return (
+                                        <li
+                                            key={item.id}
+                                            className="float-left pr-2"
+                                        >
+                                            <button
+                                                onClick={() => {
+                                                    onCategorySelected(
+                                                        item,
+                                                        level + 1
+                                                    );
+
+                                                    // 当前 children 为空时再触发 onSelected
+                                                    if (props.onSelected && item.children?.length === 0) {
+                                                        props.onSelected(item.id);
+                                                    }
+                                                }}
+                                                className={`p-1 border ${isActive}`}
                                             >
-                                                <button
-                                                    onClick={() => {
-                                                        onCategorySelected(
-                                                            item,
-                                                            level + 1
-                                                        );
-                                                        if (props.onSelected)
-                                                            props.onSelected(
-                                                                item.id
-                                                            );
-                                                    }}
-                                                    className={`p-1 border ${isActive}`}
-                                                >
-                                                    {item.name}
-                                                </button>
-                                            </li>
-                                        );
-                                    })
-                                  : null}
-                          </ul>
-                      ) : null;
-                  })
+                                                {item.name}
+                                            </button>
+                                        </li>
+                                    );
+                                })
+                                : null}
+                        </ul>
+                    ) : null;
+                })
                 : null}
         </>
     );
