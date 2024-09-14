@@ -26,7 +26,7 @@ export default function Header() {
     useEffect(() => {
     }, []);
 
-    return (<header className={"bg-gray-100 sticky top-0 w-full border-b-1 shadow-md bg-gradient-to-b from-gray-50 to-gray-300"}>
+    return (<header className={"z-50 bg-gray-100 sticky top-0 w-full border-b-1 shadow-md bg-gradient-to-b from-gray-50 to-gray-300"}>
         <div className="flex justify-between px-6 items-center">
             <div>
                 <nav className="mx-auto py-1">

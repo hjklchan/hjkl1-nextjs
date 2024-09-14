@@ -37,7 +37,9 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
     return <>
         <div className="flex w-full my-2">
-            <div className="hidden lg:flex flex-none w-64">Left</div>
+            <div className="hidden lg:flex flex-none bg-blue-400 w-64 mr-8">
+                Left
+            </div>
             <div className="flex-1">
                 <h1 className="text-2xl text-gray-600 border-b-2 overflow-hidden border-gray-600 pb-2">
                     警惕，后门病毒在chm/vbe内嵌入GadgetToJScript生成的恶意js/vbs下载白加黑远控木马
