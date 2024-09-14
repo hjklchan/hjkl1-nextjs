@@ -1,8 +1,8 @@
 "use client"
 
-// import { useNetwork } from "ahooks";
 import Link from "next/link";
-// import { useMemo } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const navRoutes: { href: string, title: string }[] = [
     {
@@ -16,11 +16,15 @@ const navRoutes: { href: string, title: string }[] = [
 ];
 
 export default function Header() {
-    // const { online } = useNetwork();
-    //
+    const pathname = usePathname();
+
     // const onlineBgColor = useMemo(() => {
     //     return online ? "bg-blue-500" : "bg-red-500";
     // }, [online]);
+    //
+
+    useEffect(() => {
+    }, []);
 
     return (<header className={"bg-gray-100 sticky top-0 w-full border-b-1 shadow-md bg-gradient-to-b from-gray-50 to-gray-300"}>
         <div className="flex justify-between px-6 items-center">
@@ -36,10 +40,12 @@ export default function Header() {
                         <div className="flex space-x-3 ml-3 text-xs items-center">
                             {
                                 navRoutes.map((route) => {
+                                    const highlightColor = pathname === route.href ? "text-[#369] font-semibold" : "text-gray-800";
+
                                     return <Link
                                         key={route.href}
                                         href={route.href}
-                                        className="select-none text-gray-800"
+                                        className={`${highlightColor}`}
                                     >
                                         {route.title}
                                     </Link>;
