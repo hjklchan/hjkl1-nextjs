@@ -51,12 +51,13 @@ export default function BlogPage() {
         return jsonData.data;
     };
 
-    const fetchPosts = async (categoryId?: number) => {
-        const defaultUrl = "http://127.0.0.1:9000/posts";
+    const fetchPosts = async (page?: number, categoryId?: number) => {
+        const currentPage = page ? page : 1;
+        const defaultUrl = `http://127.0.0.1:9000/posts?page=${currentPage}&page_size=15`;
 
         let url: string;
         if (categoryId) {
-            url = `http://127.0.0.1:9000/posts?category_id=${categoryId}`;
+            url = `http://127.0.0.1:9000/posts?page=${currentPage}&page_size=15&category_id=${categoryId}`;
         } else {
             url = defaultUrl;
         }
@@ -85,8 +86,7 @@ export default function BlogPage() {
             return;
         }
 
-        setLoadingPost(true);
-        fetchPosts(categoryId)
+        fetchPosts(1, categoryId)
             .then(res => {
                 setPosts(res);
             })
@@ -98,6 +98,28 @@ export default function BlogPage() {
                 setCurrentCategoryId(categoryId);
             });
     };
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const onPreviousPage = () => {
+        if (currentPage <= 0) {
+            setCurrentPage(1);
+            return;
+        }
+
+        setCurrentPage(pre => pre - 1);
+    }
+
+    const onNextPage = () => {
+        setCurrentPage(pre => pre + 1)
+    }
+
+    useEffect(() => {
+        (async () => {
+            const posts = await fetchPosts(currentPage);
+            setPosts(posts);
+        })();
+    }, [currentPage]);
 
     useEffect(() => {
         (async () => {
@@ -165,57 +187,73 @@ export default function BlogPage() {
                     </tbody>
                 </table>
                 {posts.length > 0 ? (
-                    <table
-                        className="table-fixed w-full text-sm text-[#334]"
-                        cellSpacing={0}
-                        cellPadding={0}
-                    >
-                        <tbody className={"tableBody"}>
-                            {posts.map((post) => {
-                                const updatedAt = moment(
-                                    post.updated_at
-                                ).format("YYYY/MM/DD");
+                    <>
+                        <table
+                            className="table-fixed w-full text-sm text-[#334]"
+                            cellSpacing={0}
+                            cellPadding={0}
+                        >
+                            <tbody className={"tableBody"}>
+                                {posts.map((post) => {
+                                    const updatedAt = moment(
+                                        post.updated_at
+                                    ).format("YYYY/MM/DD");
 
-                                return (
-                                    <tr
-                                        key={post.id}
-                                        className="table-row align-middle hover:bg-[#F2F2F2]"
-                                    >
-                                        <td className="w-6">
-                                            <HiOutlineChatBubbleBottomCenterText className="w-full block" />
-                                        </td>
-                                        <td>
-                                            <Link
-                                                href={""}
-                                                className="hover:cursor-pointer text-[#369] pl-1 pr-2"
-                                            >
-                                                [{post.category_name}]
-                                            </Link>
-                                            <Link
-                                                href={`/blog/posts/${post.id}`}
-                                                className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]"
-                                                {...newTabProps}
-                                            >
-                                                {post.title}
-                                            </Link>
-                                        </td>
-                                        <td className="w-28">
-                                            <cite>
-                                                <button
-                                                    className="hover:cursor-pointer text-[#369]"
-                                                    title="(TODO)"
+                                    return (
+                                        <tr
+                                            key={post.id}
+                                            className="table-row align-middle hover:bg-[#F2F2F2]"
+                                        >
+                                            <td className="w-6">
+                                                <HiOutlineChatBubbleBottomCenterText className="w-full block" />
+                                            </td>
+                                            <td>
+                                                <Link
+                                                    href={""}
+                                                    className="hover:cursor-pointer text-[#369] pl-1 pr-2"
                                                 >
-                                                    (TODO)
-                                                </button>
-                                            </cite>
-                                        </td>
-                                        <td className="w-24">1.2k / 5k</td>
-                                        <td className="w-28">{updatedAt ? updatedAt : "N/A"}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                                    [{post.category_name}]
+                                                </Link>
+                                                <Link
+                                                    href={`/blog/posts/${post.id}`}
+                                                    className="text-[#333] hover:cursor-pointer hover:border-b border-[#333]"
+                                                    {...newTabProps}
+                                                >
+                                                    {post.title}
+                                                </Link>
+                                            </td>
+                                            <td className="w-28">
+                                                <cite>
+                                                    <button
+                                                        className="hover:cursor-pointer text-[#369]"
+                                                        title="(TODO)"
+                                                    >
+                                                        (TODO)
+                                                    </button>
+                                                </cite>
+                                            </td>
+                                            <td className="w-24">1.2k / 5k</td>
+                                            <td className="w-28">{updatedAt ? updatedAt : "N/A"}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        <div className="space-x-2 mt-2 text-[#333]">
+                            <button
+                                onClick={onPreviousPage}
+                                className="border px-2"
+                            >
+                                {"<"}
+                            </button>
+                            <button
+                                onClick={onNextPage}
+                                className="border px-2"
+                            >
+                                {">"}
+                            </button>
+                        </div>
+                    </>
                 ) : (
                     <div className="py-2 text-sm text-gray-600">
                         No content...

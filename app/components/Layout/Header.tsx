@@ -55,8 +55,10 @@ export default function Header() {
                     </div>
                 </nav>
             </div>
-            <div>
-                <a className="text-xs">Others</a>
+            <div className="space-x-1">
+                <Link href="/auth/login" className="text-xs">
+                    Login
+                </Link>
             </div>
         </div>
     </header>)

@@ -60,12 +60,15 @@ export default function Category2(props: Category2Props) {
 
     return (
         <>
-            <button
-                onClick={onResetClick}
-                className="text-xs hover:border-b border-[#333]"
-            >
-                Reset
-            </button>
+            {
+                preselectItems.size > 1 ?
+                    <button
+                        onClick={onResetClick}
+                        className="text-xs hover:border-b border-[#333]"
+                    >
+                        Reset
+                    </button> : null
+            }
             {preselectItems.size > 0
                 ? Array.from(preselectItems).map((item) => {
                     const [level, category] = item;
